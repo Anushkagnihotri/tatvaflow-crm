@@ -6,11 +6,14 @@ import { randomUUID } from "node:crypto";
 export const leadsRouter = Router();
 
 const leadSchema = z.object({
-  name: z.string().trim().min(1),
-  company: z.string().trim().min(1),
-  email: z.string().email(),
+  name: z.string().trim().min(1).max(120),
+  company: z.string().trim().min(1).max(160),
+  email: z.string().trim().email().max(254),
   value: z.number().positive(),
   status: z.enum(["New", "Contacted", "Qualified", "Won"]).default("New"),
+});
+const leadUpdateSchema = leadSchema.partial().extend({
+  status: z.enum(["New", "Contacted", "Qualified", "Won"]).optional(),
 });
 
 type Lead = z.infer<typeof leadSchema> & { id: string };
@@ -59,8 +62,8 @@ const leads: Lead[] = [
 ];
 
 leadsRouter.get("/", (req, res) => {
-  const search = String(req.query.search ?? "").toLowerCase();
-  const status = String(req.query.status ?? "");
+  const search = String(req.query.search ?? "").trim().toLowerCase();
+  const status = String(req.query.status ?? "").trim();
 
   const data = leads.filter((lead) => {
     const searchable = `${lead.name} ${lead.company} ${lead.email}`.toLowerCase();
@@ -93,10 +96,13 @@ leadsRouter.patch("/:id", (req, res) => {
     return res.status(404).json({ error: "Lead not found" });
   }
 
-  const parsed = leadSchema.partial().safeParse(req.body);
+  const parsed = leadUpdateSchema.safeParse(req.body);
 
-  if (!parsed.success) {
-    return res.status(400).json({ error: "Invalid lead data" });
+  if (!parsed.success || Object.keys(parsed.data ?? {}).length === 0) {
+    return res.status(400).json({
+      error: "Invalid lead data",
+      ...(parsed.success ? {} : { details: parsed.error.flatten() }),
+    });
   }
 
   Object.assign(lead, parsed.data);

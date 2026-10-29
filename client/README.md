@@ -1,32 +1,45 @@
-# React + TypeScript + Vite
+# TatvaFlow CRM frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+The client is a React + TypeScript single-page application built with Vite. Its screens are React components in `src/*.tsx`; visual styles are in `src/*.css`.
 
-Currently, two official plugins are available:
+## Run locally
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+Install dependencies and start Vite:
 
-## React Compiler
-
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the Oxlint configuration
-
-If you are developing a production application, we recommend enabling type-aware lint rules by installing `oxlint-tsgolint` and editing `.oxlintrc.json`:
-
-```json
-{
-  "$schema": "./node_modules/oxlint/configuration_schema.json",
-  "plugins": ["react", "typescript", "oxc"],
-  "options": {
-    "typeAware": true
-  },
-  "rules": {
-    "react/rules-of-hooks": "error",
-    "react/only-export-components": ["warn", { "allowConstantExport": true }]
-  }
-}
+```powershell
+npm.cmd install
+npm.cmd run dev
 ```
 
-See the [Oxlint rules documentation](https://oxc.rs/docs/guide/usage/linter/rules) for the full list of rules and categories.
+Start the API separately from the repository's `server/` directory:
+
+```powershell
+cd ..\server
+npm.cmd run dev
+```
+
+The client defaults to `http://localhost:4000/api`. To use another API base URL, configure `VITE_API_URL` in the frontend environment, for example:
+
+```text
+VITE_API_URL=http://localhost:4000/api
+```
+
+## Available views
+
+- **Dashboard:** current lead metrics and recent records.
+- **Leads:** create, search, filter, update status, and delete leads through the API.
+- **Pipeline:** group lead values by current status.
+- **Activities:** add, complete, and remove follow-ups in the current page session.
+- **Reports:** calculate counts and deal-value summaries from API lead data.
+- **Settings:** toggle compact lead-table rows and refresh data.
+
+The backend stores lead records in memory only. Activities and the compact-row preference are frontend session state; they are not sent to the backend or retained after the page is reloaded. Authentication and database persistence are not implemented.
+
+## Frontend checks
+
+```powershell
+npm.cmd run build
+npm.cmd run lint
+```
+
+`build` runs the TypeScript project checks before producing the Vite production bundle.
